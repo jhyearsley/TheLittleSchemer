@@ -390,85 +390,10 @@
 
              
              
-(define numbered?
-  (lambda (aexp)
-    (cond
-      ((atom? aexp) (number? aexp))       
-      (else
-       (and (numbered? (car aexp))
-            (numbered? (car (cdr (cdr aexp)))))))))
+           
 
-(define value1
-  (lambda (nexp)
-    (cond
-      ((atom? nexp) nexp)
-      ((eq? (car (cdr nexp)) '+)
-       (+ (value (car nexp))
-          (value (car (cdr (cdr nexp))))))
-      ((eq? (car (cdr nexp)) '*)
-       (* (value (car nexp))
-          (value (car (cdr (cdr nexp))))))
-      (else
-       (tothe (value (car nexp))
-              (value (car (cdr (cdr nexp)))))))))
+      
 
-(define 1st-sub-exp
-  (lambda (aexp)
-    (car aexp)))
-
-(define 2nd-sub-exp
-  (lambda (aexp)
-    (car (cdr (cdr aexp)))))
-
-(define operator
-  (lambda (aexp)
-    (car (cdr aexp))))
-       
-(define value
-  (lambda (nexp)
-    (cond
-      ((atom? nexp) nexp)
-      ((eq? (operator nexp) '+)
-       (+ (value (1st-sub-exp nexp))
-          (value (2nd-sub-exp nexp))))
-      ((eq? (operator nexp) '*)
-       (* (value (1st-sub-exp nexp))
-          (value (2nd-sub-exp nexp))))
-      (else
-       (tothe (value (1st-sub-exp nexp))
-              (value (2nd-sub-exp nexp)))))))
-
-
-(define isZero?
-  (lambda (n)
-    (null? n)))
-
-(define likeAdd1
-  (lambda (n)
-    (cons '() n)))
-
-(define likeSub1
-  (lambda (n)
-    (cdr n)))
-
-(define myPlus
-  (lambda (m n)
-    (cond
-      ((isZero? n) m)
-      (else (myPlus (likeAdd1 m) (likeSub1 n))))))
-
-(define set?
-  (lambda (lat)
-    (cond
-      ((null? lat) #t)
-      ((member? (car lat) (cdr lat)) #f)
-      (else (set? (cdr lat))))))
-
-(define makeset
-  (lambda (lat)
-    (cond
-      ((null? lat) '())      
-      (else
-       (cons (car lat)
-             (makeset
-              (rember* (car lat) (cdr lat))))))))
+ 
+(myEqual? '((beef (foo) (foo)))
+          '((beef (foo) (foo))))
