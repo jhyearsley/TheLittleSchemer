@@ -30,8 +30,15 @@
   (lambda (l)
     (cond
       ((null? l) (quote()))
-      (else (cons (car (car l))
+      (else (cons (first (car l))
                   (firsts (cdr l)))))))
+
+(define seconds
+  (lambda (l)
+    (cond
+      ((null? l) (quote()))
+      (else (cons (second (car l))
+                  (seconds (cdr l)))))))
 
 (define insertR
   (lambda (new old lat)
@@ -195,11 +202,11 @@
       (else
        (* a (tothe a (sub1 b)))))))
 
-(define foo
+(define integerdivision
   (lambda (n m)
     (cond
       ((< n m) 0)
-      (else (add1 (foo (- n m) m))))))
+      (else (add1 (integerdivision (- n m) m))))))
 
 (define mylength
   (lambda (lat)
@@ -538,4 +545,113 @@
 ;(intersect '(1 2 3) (intersect '(1 2) (intersectall '((1)))))
 ;(intersect '(1 2 3) (intersect '(1 2) '(1)))
 ;(intersect '(1 2 3) '(1))
-;'(1)                
+;'(1)
+
+(define a-pair
+  (lambda (l)    
+    (and (not (null? l))
+         (not (null? (cdr l)))
+         (null? (cdr (cdr l))))))
+      
+(define first
+  (lambda (p)
+    (car p)))
+
+(define second
+  (lambda (p)
+    (car (cdr p))))
+
+(define third
+  (lambda (l)
+    (car (cdr (cdr l)))))
+
+(define build
+  (lambda (s1 s2)
+    (cons s1 (cons s2 '()))))
+
+(define fun?
+  (lambda (rel)
+    (set? (firsts rel))))
+
+(define revpair
+  (lambda (pair)
+    (build (second pair) (first pair))))
+
+(define revrel
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+       (cons (revpair (car rel))
+             (revrel (cdr rel)))))))
+
+(define fullfun?
+  (lambda (fun)
+    (set? (seconds fun))))
+
+(define rember-f
+  (lambda (test?)
+    (lambda (a l)
+      (cond
+        ((null? l) (quote()))
+        ((test? (car l) a) (cdr l))
+        (else (cons (car l)
+                    ((rember-f test?)
+                              a
+                              (cdr l))))))))
+(define rember-eq?
+  (rember-f eq?))
+
+  
+(define eq?-c
+  (lambda (a)
+    (lambda (x)
+      (eq? x a))))
+
+(define insertL-f
+  (lambda (test?)
+    (lambda (new old l)      
+      (cond
+        ((null? l) (quote()))      
+        ((test? (car l) old)
+         (cons new l))
+        (else
+         (cons (car l)
+               ((insertL-f test?) new old (cdr l))))))))
+
+(define insertR-f
+  (lambda (test?)
+    (lambda (new old l)
+      (cond
+        ((null? l) (quote()))                 
+        ((test? (car l) old)
+         (cons old (cons new (cdr l))))
+        (else
+         (cons (car l)
+               ((insertR-f test?) new old (cdr l))))))))
+                             
+(define seqL
+  (lambda (new old l)
+    (cons new (cons old l))))
+
+(define seqR
+  (lambda (new old l)
+    (cons old (cons new l))))
+
+
+(define insert-g
+  (lambda (seq)
+    (lambda (new old l)
+      (cond
+        ((null? l) (quote()))      
+        ((eq? (car l) old)
+         (seq new old (cdr l))
+        (else
+         (cons (car l)
+               ((insert-g seq) new old (cdr l)))))))))
+
+(define atom-to-function
+  (lambda (x)
+    ((eq? x '+) +)
+    ((eq? x '*) *)
+    (else tothe)))
