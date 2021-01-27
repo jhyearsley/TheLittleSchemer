@@ -410,18 +410,18 @@
     (cond
       ((atom? nexp) nexp)
       ((eq? (car (cdr nexp)) '+)
-       (+ (value (car nexp))
-          (value (car (cdr (cdr nexp))))))
+       (+ (value1 (car nexp))
+          (value1 (car (cdr (cdr nexp))))))
       ((eq? (car (cdr nexp)) '*)
-       (* (value (car nexp))
-          (value (car (cdr (cdr nexp))))))
+       (* (value1 (car nexp))
+          (value1 (car (cdr (cdr nexp))))))
       (else
-       (tothe (value (car nexp))
-              (value (car (cdr (cdr nexp)))))))))
+       (tothe (value1 (car nexp))
+              (value1 (car (cdr (cdr nexp)))))))))
 
 (define 1st-sub-exp
   (lambda (aexp)
-    (car aexp)))
+    (car (cdr aexp))))
 
 (define 2nd-sub-exp
   (lambda (aexp)
@@ -429,21 +429,21 @@
 
 (define operator
   (lambda (aexp)
-    (car (cdr aexp))))
+    (car aexp)))
        
-(define value
+(define value2
   (lambda (nexp)
     (cond
       ((atom? nexp) nexp)
       ((eq? (operator nexp) '+)
-       (+ (value (1st-sub-exp nexp))
-          (value (2nd-sub-exp nexp))))
+       (+ (value2 (1st-sub-exp nexp))
+          (value2 (2nd-sub-exp nexp))))
       ((eq? (operator nexp) '*)
-       (* (value (1st-sub-exp nexp))
-          (value (2nd-sub-exp nexp))))
+       (* (value2 (1st-sub-exp nexp))
+          (value2 (2nd-sub-exp nexp))))
       (else
-       (tothe (value (1st-sub-exp nexp))
-              (value (2nd-sub-exp nexp)))))))
+       (tothe (value2 (1st-sub-exp nexp))
+              (value2 (2nd-sub-exp nexp)))))))
 
 
 (define isZero?
@@ -645,13 +645,59 @@
       (cond
         ((null? l) (quote()))      
         ((eq? (car l) old)
-         (seq new old (cdr l))
+         (seq new old (cdr l)))
         (else
          (cons (car l)
-               ((insert-g seq) new old (cdr l)))))))))
+               ((insert-g seq) new old (cdr l))))))))
 
 (define atom-to-function
   (lambda (x)
-    ((eq? x '+) +)
-    ((eq? x '*) *)
-    (else tothe)))
+    (cond
+      ((eq? x '+) +)
+      ((eq? x '*) *)
+      (else tothe))))
+
+(define value
+  (lambda (nexp)
+    (cond
+      ((atom? nexp) nexp)
+      (else
+       ((atom-to-function (operator nexp))      
+        (value (1st-sub-exp nexp))
+        (value (2nd-sub-exp nexp)))))))
+
+(define multirember-f
+  (lambda (test?)
+    (lambda (a lat)
+      (cond
+        ((null? lat) (quote()))               
+        ((test? (car lat) a)
+         ((multirember-f test?) a
+                                (cdr lat)))
+        (else (cons (car lat)
+                    ((multirember-f test?) a
+                                           (cdr lat))))))))
+
+(define multirember-eq?
+  (multirember-f eq?))
+
+(define even?
+  (lambda (n)
+    (= (* (/ n 2) 2) n)))
+
+(define evens-only*
+  (lambda (l)
+    (cond
+      ((null? l) '())
+      (else
+       (cond
+         ((atom? (car l))
+          (cond
+            ((even? (car l))
+             (cons (car l)
+                   (evens-only* (cdr l))))
+            (else
+             (evens-only* (cdr l)))))
+         (else (cons (evens-only* (car l))
+                     (evens-only* (cdr l)))))))))
+
