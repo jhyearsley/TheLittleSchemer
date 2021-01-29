@@ -681,9 +681,9 @@
 (define multirember-eq?
   (multirember-f eq?))
 
-(define even?
-  (lambda (n)
-    (= (* (/ n 2) 2) n)))
+;(define even?
+;  (lambda (n)
+;    (= (* (/ n 2) 2) n)))
 
 (define evens-only*
   (lambda (l)
@@ -700,4 +700,15 @@
              (evens-only* (cdr l)))))
          (else (cons (evens-only* (car l))
                      (evens-only* (cdr l)))))))))
+
+(define shift
+  (lambda (pair)
+    (build (first (first pair))
+           (build (second (first pair))
+                  (second pair)))))
+                  
+                  
+    
+
+
 
