@@ -547,11 +547,14 @@
 ;(intersect '(1 2 3) '(1))
 ;'(1)
 
-(define a-pair
-  (lambda (l)    
-    (and (not (null? l))
-         (not (null? (cdr l)))
-         (null? (cdr (cdr l))))))
+(define a-pair?
+  (lambda (x)    
+    (cond
+      ((atom? x) #f)
+      ((null? x) #f)
+      ((null? (cdr x)) #f)
+      ((null? (cdr (cdr x))) #t)
+      (else #f))))
       
 (define first
   (lambda (p)
@@ -708,7 +711,52 @@
                   (second pair)))))
                   
                   
+(define align
+  (lambda (pora)
+    (cond
+      ((atom? pora) pora)
+      ((a-pair? (first pora))
+       (align (shift pora)))
+      (else (build (first pora)
+                   (align (second pora)))))))
+
+
+(define new-entry build)
+
+(define lookup-in-entry
+  (lambda (name entry entry-f)
+    (lookup-in-entry-help name
+                          (first entry)
+                          (second entry)
+                          entry-f)))
+
+(define lookup-in-entry-help
+  (lambda (name names values entry-f)
+    (cond
+      ((null? names) (entry-f name))
+      ((eq? (car names) name) (car values))
+      (else
+       (lookup-in-entry-help name
+                             (cdr names)
+                             (cdr values)
+                             entry-f)))))
+
+(define extend-table cons)
+
+(define lookup-in-table
+  (lambda (name table table-f)
+    (cond
+      ((null? table) (table-f name))
+      (else (lookup-in-entry name
+                             (car table)
+                             (lambda (name)
+                               (lookup-in-table name
+                                                (cdr table)
+                                                table-f)))))))
+    
+    
     
 
 
-
+                         
+        
